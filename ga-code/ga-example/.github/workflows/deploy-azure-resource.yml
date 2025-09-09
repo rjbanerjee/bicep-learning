@@ -1,0 +1,35 @@
+name: 'Deploy Azure Resources'
+description: 'Learning Bicep'
+icon: 'https://learn.microsoft.com/en-us/azure/architecture/bicep/media/bicep-icon.png'
+
+
+on: 
+  push:
+    branches:[ "master" ]
+
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'checkout repository'
+        uses: actions/checkout@v3
+
+      - name: Echo Script
+        run: echo "Starting Bicep"
+
+      - name: 'Login with Azure'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 'Deploy Bicep Script'
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: '<myResourceGroupName>'
+          template: '../azure-resources.bicep'
+
+      - name: 'Build and Deploy Azure Resources'
+        run: |
+          bicep build  ../azure-resources.bicep
+          az deployment sub create --name myDeployment --location westus3 --template-file ./azure-resources.json
