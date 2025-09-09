@@ -1,196 +1,212 @@
 # Bicep Learning Repository
 
-A comprehensive learning repository for Azure Bicep Infrastructure as Code (IaC) demonstrating various Azure resource deployments using modular architecture.
+This repository contains Azure Bicep templates and examples for learning Infrastructure as Code (IaC) with Azure Bicep. The project demonstrates how to deploy Azure resources including storage accounts, app service plans, and containerized web applications.
 
 ## 📁 Repository Structure
 
 ```
 bicep-learning/
-├── azure.yaml                           # Azure configuration with basic GitHub Actions
-├── main.bicep                          # Main deployment template with modular architecture
-├── storage.bicep                       # Empty storage template (placeholder)
-├── ga-code/
+├── main.bicep                     # Main Bicep template
+├── README.md                      # This documentation file
+├── azure-credential-json/         # Azure credentials configuration
+│   └── azure-credential.json      # Template for Azure service principal credentials
+├── ga-code/                       # GitHub Actions related code
 │   └── ga-example/
-│       └── azure-resources.bicep       # GitHub Actions example deployment
-└── modules/
-    ├── servicePlan.bicep               # App Service Plan module
-    ├── storage.bicep                   # Storage Account module
-    └── webApp.bicep                    # Web Application module
+│       └── azure-resources.bicep  # Alternative deployment template for CI/CD
+└── modules/                       # Reusable Bicep modules
+    ├── servicePlan.bicep          # App Service Plan module
+    ├── storage.bicep              # Storage Account module
+    └── webApp.bicep               # Web Application module
 ```
 
-## 🎯 Learning Objectives
+## 🚀 What This Repository Deploys
 
-This repository demonstrates:
-- **Modular Bicep Architecture**: Breaking down infrastructure into reusable modules
-- **Parameter Management**: Using parameters with validation, descriptions, and constraints
-- **Resource Dependencies**: Understanding how modules depend on each other
-- **Output Management**: Exposing values from modules for use in other resources
-- **Best Practices**: Following Azure Bicep naming conventions and security practices
+This Bicep template creates the following Azure resources:
+
+- **Storage Account**: A Premium LRS storage account for application data
+- **App Service Plan**: A Linux-based B1 SKU App Service Plan
+- **Web Application**: A containerized web app running Docker images
 
 ## 📋 File Descriptions
 
-### Root Level Files
-
-#### `azure.yaml`
-Azure configuration file containing:
-- Project metadata (name, description, icon)
-- Basic GitHub Actions workflow configuration
-- Simple "Hello World" demonstration
+### Main Templates
 
 #### `main.bicep`
-The main orchestration template that:
-- Defines global parameters with validation rules
-- Orchestrates multiple modules (storage, service plan, web app)
-- Demonstrates parameter passing between modules
-- Outputs the final website URL
-- **Key Features:**
-  - Storage name validation (5-24 characters)
-  - Location restrictions to specific Azure regions
-  - Docker container configuration for web apps
+The primary deployment template that orchestrates all modules. Features:
+- Modular architecture using module references
+- Parameterized configuration for flexibility
+- Deploys storage, app service plan, and web application
+- Default configuration deploys nginx demo container
+- Includes parameter validation and descriptions
 
-#### `storage.bicep`
-Empty file - placeholder for future storage configurations
+**Key Parameters:**
+- `storageName`: Storage account name (5-24 characters, globally unique)
+- `location`: Azure region (restricted to specific regions)
+- `dockerImage`: Docker image to deploy (default: nginxdemos/hello)
+- `namePrefix`: Prefix for resource naming
 
-### ga-code/ga-example/
+#### `ga-code/ga-example/azure-resources.bicep`
+Alternative deployment template designed for GitHub Actions CI/CD pipeline:
+- Similar structure to main.bicep but with different default values
+- Uses Ubuntu nginx image instead of nginxdemos/hello
+- Relative module references for CI/CD compatibility
 
-#### `azure-resources.bicep`
-Simple example demonstrating:
-- Basic storage account deployment
-- Parameter usage for location and naming
-- Premium LRS storage configuration
+### Modules
 
-### modules/
+#### `modules/storage.bicep`
+Deploys an Azure Storage Account with:
+- StorageV2 kind with Premium LRS SKU
+- Configurable name and location
+- Parameter validation for storage account naming requirements
 
-#### `servicePlan.bicep`
-App Service Plan module featuring:
-- Linux-based hosting plan
-- Configurable SKU (defaults to B1)
-- Resource naming with prefix pattern
-- Output of plan ID for dependent resources
+#### `modules/servicePlan.bicep`
+Creates an App Service Plan with:
+- Linux-based hosting environment
+- Configurable SKU (default: B1)
+- Resource group location inheritance
+- Output of plan ID for consumption by web app module
 
-#### `storage.bicep`
-Storage Account module with:
-- Parameter validation for storage naming
-- StorageV2 with Premium LRS configuration
-- Configurable location parameter
+#### `modules/webApp.bicep`
+Deploys a containerized web application with:
+- Docker container support from Docker Hub
+- Linux container configuration
+- App Service storage disabled for containers
+- Configurable Docker image and tag
+- Output of site URL for access
 
-#### `webApp.bicep`
-Web Application module that:
-- Deploys containerized applications
-- Configures Docker registry settings
-- Links to App Service Plan via parameter
-- Outputs the website URL
-- Supports custom Docker images and tags
+### Configuration
 
-## 🚀 Deployment Examples
-
-### Basic Deployment
-```bash
-# Deploy the main template
-az deployment group create \
-  --resource-group myResourceGroup \
-  --template-file main.bicep \
-  --parameters storageName=myuniquestorage location=westus3
-```
-
-### Custom Docker Image Deployment
-```bash
-# Deploy with custom Docker image
-az deployment group create \
-  --resource-group myResourceGroup \
-  --template-file main.bicep \
-  --parameters storageName=myuniquestorage \
-               dockerImage=nginxdemos/hello \
-               dockerImageTag=latest \
-               namePrefix=myapp
-```
-
-### GitHub Actions Example
-```bash
-# Deploy the GA example
-az deployment group create \
-  --resource-group myResourceGroup \
-  --template-file ga-code/ga-example/azure-resources.bicep \
-  --parameters storageName=gastorageexample
-```
-
-## 📚 Learning Topics Covered
-
-### 1. **Parameter Management**
-- String length validation (`@minLength`, `@maxLength`)
-- Allowed values restriction (`@allowed`)
-- Parameter descriptions for documentation
-- Default values and optional parameters
-
-### 2. **Modular Architecture**
-- Breaking infrastructure into logical modules
-- Parameter passing between modules
-- Output consumption from child modules
-- Module naming conventions
-
-### 3. **Resource Types**
-- **Storage Accounts**: Different SKUs and configurations
-- **App Service Plans**: Linux hosting with scalable SKUs
-- **Web Apps**: Container-based applications with Docker support
-
-### 4. **Best Practices**
-- Consistent naming conventions with prefixes
-- Resource grouping and organization
-- Parameter validation and constraints
-- Output management for resource references
-
-### 5. **Docker Integration**
-- Container deployment to Azure App Service
-- Docker registry configuration
-- Custom image and tag management
-- Linux container hosting
+#### `azure-credential-json/azure-credential.json`
+Template file for Azure service principal credentials used for authentication:
+- Contains placeholder values for Azure AD application
+- Required for programmatic deployments
+- Should be configured with actual values (keep secure!)
 
 ## 🛠️ Prerequisites
 
 - Azure CLI installed and configured
-- Valid Azure subscription
-- Basic understanding of Azure services
-- Familiarity with Infrastructure as Code concepts
+- Azure subscription with appropriate permissions
+- Resource group created for deployment
+- Docker Hub access (for public images)
 
-## 🔗 Useful Commands
+## 📖 Usage
+
+### Basic Deployment
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd bicep-learning
+   ```
+
+2. **Deploy using Azure CLI:**
+   ```bash
+   az deployment group create \
+     --resource-group <your-resource-group> \
+     --template-file main.bicep \
+     --parameters storageName=<unique-storage-name> \
+                  location=<azure-region> \
+                  namePrefix=<your-prefix>
+   ```
+
+3. **Deploy with custom parameters:**
+   ```bash
+   az deployment group create \
+     --resource-group myResourceGroup \
+     --template-file main.bicep \
+     --parameters storageName=myuniquestorage123 \
+                  location=westus3 \
+                  dockerImage=nginx \
+                  dockerImageTag=alpine \
+                  namePrefix=myapp
+   ```
+
+### GitHub Actions Deployment
+
+Use the template in `ga-code/ga-example/azure-resources.bicep` for CI/CD deployments:
 
 ```bash
-# Validate Bicep template
-az deployment group validate --resource-group myRG --template-file main.bicep
-
-# Preview changes
-az deployment group what-if --resource-group myRG --template-file main.bicep
-
-# Deploy with parameter file
-az deployment group create --resource-group myRG --template-file main.bicep --parameters @parameters.json
-
-# Check deployment status
-az deployment group show --resource-group myRG --name deploymentName
+az deployment group create \
+  --resource-group <your-resource-group> \
+  --template-file ga-code/ga-example/azure-resources.bicep
 ```
 
-## 📖 Next Steps
+## 🔧 Customization
 
-1. **Enhance Modules**: Add more Azure services (databases, networking, etc.)
-2. **Parameter Files**: Create environment-specific parameter files
-3. **CI/CD Integration**: Expand GitHub Actions for automated deployments
-4. **Security**: Implement Key Vault integration for secrets management
-5. **Monitoring**: Add Application Insights and monitoring resources
+### Supported Azure Regions
+- `eastus`
+- `westus3`
+- `southeastasia`
+- `centralindia`
+
+### Docker Images
+The template supports any publicly available Docker image from Docker Hub. Popular options:
+- `nginxdemos/hello:latest` (default)
+- `nginx:latest`
+- `ubuntu/nginx:latest`
+- Custom images from your registry
+
+### Storage Account Configuration
+- **Kind**: StorageV2
+- **SKU**: Premium_LRS
+- **Tier**: Hot (configured in commented section)
+
+## 📝 Parameters Reference
+
+| Parameter | Type | Default | Description | Constraints |
+|-----------|------|---------|-------------|-------------|
+| `storageName` | string | `spacetestapp` | Storage account name | 5-24 characters, globally unique |
+| `location` | string | `westus3` | Azure region | Must be from allowed list |
+| `dockerImage` | string | `nginxdemos/hello` | Docker image name | Any valid Docker Hub image |
+| `dockerImageTag` | string | `latest` | Docker image tag | Any valid tag |
+| `namePrefix` | string | `paulon` | Resource name prefix | Used for app plan and web app naming |
+
+## 🔍 Outputs
+
+The template provides the following outputs:
+- `siteUrl`: The URL of the deployed web application
+
+## 🏗️ Architecture
+
+The solution follows a modular architecture pattern:
+
+```
+main.bicep
+├── modules/storage.bicep (Storage Account)
+├── modules/servicePlan.bicep (App Service Plan)
+└── modules/webApp.bicep (Web Application)
+    └── depends on: App Service Plan
+```
+
+## 📚 Learning Objectives
+
+This repository demonstrates:
+- **Bicep Modules**: Reusable infrastructure components
+- **Parameter Validation**: Using decorators for input validation
+- **Resource Dependencies**: Proper dependency management between resources
+- **Output Usage**: Passing data between modules
+- **Best Practices**: Modular, maintainable infrastructure code
+- **Container Deployment**: Deploying containerized applications to Azure
+
+## 🔒 Security Considerations
+
+- Store Azure credentials securely (use Azure Key Vault in production)
+- Keep `azure-credential.json` out of version control with actual values
+- Use managed identities when possible instead of service principals
+- Enable HTTPS for production deployments (currently commented out)
 
 ## 🤝 Contributing
 
-This is a learning repository. Feel free to:
-- Add new modules and examples
-- Improve existing templates
-- Document additional learning scenarios
-- Share deployment experiences
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test deployments
+5. Submit a pull request
 
-## 📝 Notes
+## 📄 License
 
-- Default location is set to `westus3` - adjust based on your requirements
-- Storage account names must be globally unique
-- The web app is configured for Linux containers by default
-- Premium LRS storage is used for demonstration - adjust SKU for cost optimization
+This project is for educational purposes. Please refer to your organization's policies for usage guidelines.
 
 ---
 
-*Happy Learning with Azure Bicep! 🚀*
+**Note**: This is a learning repository. For production use, consider additional security measures, monitoring, and backup strategies.
